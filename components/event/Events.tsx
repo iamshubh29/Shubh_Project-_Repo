@@ -32,7 +32,7 @@ export default function EventManager() {
     fetchEvents();
   }, []);
 
-  async function fetchEvents() {
+  async function fetchEvents(): Promise<void> {
     setLoading(true);
     const res = await getEvents();
     if (res) {
@@ -43,7 +43,7 @@ export default function EventManager() {
     setLoading(false);
   }
 
-  async function createPTPEvent() {
+  async function createPTPEvent(): Promise<void> {
     // --- UPDATED VALIDATION AND FUNCTION CALL ---
     if (!eventName || !eventDate || !motive) {
       toast.error("Event Name, Date, and Motive are required fields.");
@@ -64,7 +64,7 @@ export default function EventManager() {
   }
 
   // ... (All your other handler functions like handleDeleteEvent, etc., remain the same)
-  async function handleDeleteEvent(id: string) {
+  async function handleDeleteEvent(id: string): Promise<void> {
     setActionLoading(`delete-${id}`);
     const res = await deleteEventAction(id);
     if (res?.ok) {
@@ -76,7 +76,7 @@ export default function EventManager() {
     setActionLoading(null);
   }
   
-  async function handleSendCertificates(id: string) {
+  async function handleSendCertificates(id: string): Promise<void> {
     setActionLoading(`cert-${id}`);
     const res = await generateAndSendCertificatesAction(id);
     if (res.success) {
@@ -87,7 +87,7 @@ export default function EventManager() {
     setActionLoading(null);
   }
 
-  async function handleReminderEvent(id: string){
+  async function handleReminderEvent(id: string): Promise<void> {
     setActionLoading(`reminder-${id}`);
     const res = await RemainerStudents(id)
     if(res?.success){
@@ -98,7 +98,7 @@ export default function EventManager() {
     setActionLoading(null);
   }
 
-  function downloadAsCsv(filename: string, rows: any[]) {
+  function downloadAsCsv(filename: string, rows: any[]): void {
     const headers = Object.keys(rows[0] || {});
     const escape = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
     const csv = [headers.join(',')].concat(rows.map(r => headers.map(h => escape(r[h])).join(','))).join('\n');
@@ -113,7 +113,7 @@ export default function EventManager() {
     URL.revokeObjectURL(url);
   }
 
-  async function handleDownloadAttendance(id: string) {
+  async function handleDownloadAttendance(id: string): Promise<void> {
     setActionLoading(`download-${id}`);
     try {
       const res = await getEventAttendance(id);
@@ -142,10 +142,10 @@ export default function EventManager() {
         <Card>
           <CardContent className="space-y-4 p-4">
             {/* --- NEW INPUTS ADDED TO THE FORM --- */}
-            <Input placeholder="Event Name (e.g., 'Startup School 5.0')" value={eventName} onChange={(e) => setEventName(e.target.value)} />
-            <Input placeholder="Event Motive / Description" value={motive} onChange={(e) => setMotive(e.target.value)} />
-            <Input placeholder="Event Date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} type="date" />
-            <Input placeholder="Registration Fee (e.g., 'Free' or '₹100')" value={registrationFee} onChange={(e) => setRegistrationFee(e.target.value)} />
+            <Input placeholder="Event Name (e.g., 'Startup School 5.0')" value={eventName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEventName(e.target.value)} />
+            <Input placeholder="Event Motive / Description" value={motive} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMotive(e.target.value)} />
+            <Input placeholder="Event Date" value={eventDate} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEventDate(e.target.value)} type="date" />
+            <Input placeholder="Registration Fee (e.g., 'Free' or '₹100')" value={registrationFee} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRegistrationFee(e.target.value)} />
             {/* --- END OF NEW INPUTS --- */}
             <Button onClick={createPTPEvent}>Create Event</Button>
           </CardContent>
@@ -161,7 +161,7 @@ export default function EventManager() {
             ) : !events || events.length === 0 ? (
               <p className="text-center text-muted-foreground">No events found.</p>
             ) : (
-              events.map((event) => (
+              events.map((event: Event) => (
                 <Card key={event._id}>
                   <CardContent className="p-4 space-y-2">
                     <h3 className="text-lg font-semibold">{event.eventName}</h3>
@@ -174,7 +174,7 @@ export default function EventManager() {
                          📊 Download Attendance
                       </Button>
                       <Button onClick={() => handleSendCertificates(event._id)} disabled={!!actionLoading}>
-                         🎓 Send Certificates
+                         🎓 Generate & Send Certificates
                       </Button>
                        <Button className="bg-orange-500 hover:bg-orange-600 text-white" onClick={() => handleReminderEvent(event._id)} disabled={!!actionLoading}>
                         📧 Send Reminder
