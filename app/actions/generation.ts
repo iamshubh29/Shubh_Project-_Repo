@@ -101,12 +101,15 @@ export async function generateAndSendCertificatesAction(eventId: string) {
 
         const eventDate = new Date(event.eventDate);
         eventDate.setHours(0, 0, 0, 0);
+        const nextDay = new Date(eventDate.getTime() + 24 * 60 * 60 * 1000);
         
         const attendedStudents = await Students.find({
         eventName: event.eventName,
-        'attendance.date': {
-            $gte: eventDate,
-            $lt: new Date(eventDate.getTime() + 24 * 60 * 60 * 1000)
+        attendance: {
+            $elemMatch: {
+            date: { $gte: eventDate, $lt: nextDay },
+            present: true
+            }
         }
         }).lean<IStudent[]>();
 
