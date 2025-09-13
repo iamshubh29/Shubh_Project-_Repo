@@ -8,7 +8,7 @@ import { Card,CardContent,CardHeader,CardDescription, CardTitle } from '@/compon
 import { Button } from '@/components/ui/button';
 import { Alert,AlertTitle,AlertDescription } from '@/components/ui/alert';
 import { QrCode,CheckCircle,XCircle } from 'lucide-react';
-import { markStudentAttendence } from '../actions/events';
+
 
 
 export default function page() {
