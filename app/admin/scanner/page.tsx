@@ -14,10 +14,13 @@ import { useToast } from '@/hooks/use-toast';
 import { markAttendance, getAllUsers, logout } from '@/app/actions/user';
 import {Html5QrcodeScanner} from 'html5-qrcode';
 import EventManager from '@/components/event/Events';
+import Chatbot from '@/components/chatbot/Chatbot'; // ✅ 1. IMPORT THE CHATBOT COMPONENT
+
 export default function ScannerPage() {
   const router = useRouter();
   const { toast } = useToast();
   
+  // ... (all your existing state and functions remain unchanged)
   const [scanning, setScanning] = useState(false);
   const [scanResult, setScanResult] = useState<null | { success: boolean; message: string; user?: any }>(null);
   const [users, setUsers] = useState<any[]>([]);
@@ -133,6 +136,7 @@ export default function ScannerPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b">
+        {/* ... header content ... */}
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
           <img src="/RTU logo.png" alt="Logo" className="h-8 w-8" />
@@ -155,6 +159,7 @@ export default function ScannerPage() {
 
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
+          {/* ... ALL your existing page content ... */}
           <h2 className="text-2xl font-bold mb-6">Admin Dashboard</h2>
           <div className="flex gap-2 mb-4">
             <Link href="/admin/scanner/review">
@@ -371,11 +376,14 @@ export default function ScannerPage() {
       </main>
 
       <footer className="border-t py-6">
+        {/* ... footer content ... */}
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           © {new Date().getFullYear()} Event Management System. All rights reserved.
         </div>
       </footer>
+      
+      {/* ✅ 2. ADD THE CHATBOT COMPONENT HERE */}
+      <Chatbot />
     </div>
   );
 }
-
