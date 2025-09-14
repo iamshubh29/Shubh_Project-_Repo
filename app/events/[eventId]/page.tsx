@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Download, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { useEffect, useState } from 'react';
+// ✅ 1. Import `use` from React
+import { useEffect, useState, use } from 'react';
 import { toast } from 'sonner';
 
 type EventType = {
@@ -15,7 +16,11 @@ type EventType = {
   eventName: string;
 };
 
-export default function EventDetailPage({ params }: { params: { eventId: string } }) {
+// ✅ 2. Update the type definition for params
+export default function EventDetailPage({ params }: { params: Promise<{ eventId: string }> }) {
+  // ✅ 3. Unwrap the params promise with the `use()` hook
+  const { eventId } = use(params);
+
   const [event, setEvent] = useState<EventType | null>(null);
   const [posterUrl, setPosterUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -25,7 +30,8 @@ export default function EventDetailPage({ params }: { params: { eventId: string 
     const createAndSetPoster = async () => {
       setLoading(true);
       try {
-        const result = await generatePosterAction(params.eventId);
+        // ✅ 4. Use the unwrapped `eventId` variable here
+        const result = await generatePosterAction(eventId);
         if (result.success && result.posterUrl && result.event) {
           setPosterUrl(result.posterUrl);
           setEvent(result.event);
@@ -40,7 +46,8 @@ export default function EventDetailPage({ params }: { params: { eventId: string 
       }
     };
     createAndSetPoster();
-  }, [params.eventId]);
+    // ✅ 5. Use the unwrapped `eventId` in the dependency array
+  }, [eventId]);
   
   const handleDownload = () => {
     if (!posterUrl || !event) return;

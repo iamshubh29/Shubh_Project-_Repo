@@ -3,8 +3,10 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 export interface IEvent extends Document {
   eventName: string;
   eventDate: string;
-  motive: string; // <-- ADDED
-  registrationFee?: string; // <-- ADDED (optional)
+  motive: string;
+  registrationFee?: string;
+  // This field will store the unique filename of the uploaded certificate for this specific event.
+  certificateTemplate?: string; 
   eventRegistrations: Types.ObjectId[];
   attendance: {
     name: string;
@@ -27,17 +29,19 @@ const EventSchema = new Schema<IEvent>(
       type: String,
       required: [true, 'Please provide an event date'],
     },
-    // --- NEW FIELDS ADDED HERE ---
     motive: {
       type: String,
       required: [true, 'Please provide an event motive or description'],
       trim: true,
     },
     registrationFee: {
-      type: String, // Using String to allow for "Free" or "₹100"
+      type: String,
       trim: true,
     },
-    // --- END OF NEW FIELDS ---
+    // The path to the custom certificate template is stored here.
+    certificateTemplate: {
+      type: String,
+    },
     eventRegistrations: [
       {
         type: Schema.Types.ObjectId,

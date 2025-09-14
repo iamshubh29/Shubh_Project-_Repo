@@ -4,21 +4,18 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowLeft, Mail, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, Mail, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"; // UPDATED: This now uses the correct 'sonner' toast library
 import { getEvents, RemainerStudents } from "@/app/actions/events";
 
 interface Event {
   _id: string;
   eventName: string;
   eventDate: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export default function SendReminderPage() {
-  const { toast } = useToast();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState<string | null>(null);
@@ -33,152 +30,98 @@ export default function SendReminderPage() {
       const res = await getEvents();
       setEvents(res || []);
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to fetch events",
-      });
+      toast.error("Failed to fetch events"); // Corrected toast call
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleSendReminder(eventId: string, eventName: string) {
+  async function handleSendReminder(eventId: string) {
     setSending(eventId);
     try {
       const res = await RemainerStudents(eventId);
       if (res?.success) {
-        toast({
-          title: "Success",
-          description: res.message || "Reminder emails sent successfully!",
-        });
+        toast.success(res.message || "Reminder emails sent successfully!"); // Corrected toast call
       } else {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: res?.message || "Failed to send reminder emails",
-        });
+        toast.error(res?.message || "Failed to send reminder emails"); // Corrected toast call
       }
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Something went wrong while sending reminders",
-      });
+      toast.error("Something went wrong while sending reminders"); // Corrected toast call
     } finally {
       setSending(null);
     }
   }
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-IN', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString('en-US', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
+    <div className="min-h-screen bg-gray-900 text-white">
+      <header className="sticky top-0 w-full bg-gray-900/80 backdrop-blur-md z-50 border-b border-gray-700">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <img src="/RTU logo.png" alt="Logo" className="h-8 w-8" />
-            <h1 className="text-xl font-bold">Event Management System</h1>
+          <div className="flex items-center space-x-3">
+            <img src="/RTU logo.png" alt="Logo" className="h-9 w-9" />
+            <h1 className="text-xl font-bold">Event Reminders</h1>
           </div>
-          <div className="flex items-center space-x-2">
-            <Link href="/admin/scanner">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
-              </Button>
-            </Link>
-          </div>
+          <Link href="/admin/scanner">
+            <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </Link>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
+          <div className="mb-8 text-center">
             <h2 className="text-3xl font-bold mb-2">Send Event Reminders</h2>
-            <p className="text-muted-foreground">
-              Send reminder emails to all students registered for specific events
+            <p className="text-gray-400">
+              Select an event to send a reminder email to all registered students.
             </p>
           </div>
 
           {loading ? (
-            <div className="text-center py-8">
-              <p>Loading events...</p>
-            </div>
+            <div className="text-center py-12"><Loader2 className="h-8 w-8 animate-spin mx-auto text-gray-500" /></div>
           ) : events.length === 0 ? (
-            <Alert>
+            <Alert className="bg-gray-800 border-gray-700">
               <XCircle className="h-4 w-4" />
               <AlertDescription>
-                No events found. Create an event first to send reminders.
+                No events found. Create an event on the dashboard before sending reminders.
               </AlertDescription>
             </Alert>
           ) : (
-            <div className="grid gap-4">
+            <div className="space-y-4">
               {events.map((event) => (
-                <Card key={event._id}>
+                <Card key={event._id} className="bg-gray-800 border-gray-700">
                   <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span>{event.eventName}</span>
-                      <span className="text-sm font-normal text-muted-foreground">
-                        {formatDate(event.eventDate)}
-                      </span>
-                    </CardTitle>
+                    <CardTitle>{event.eventName}</CardTitle>
                     <CardDescription>
-                      Event scheduled for {formatDate(event.eventDate)}
+                      Scheduled for {formatDate(event.eventDate)}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                        <Mail className="h-4 w-4" />
-                        <span>Send reminder to all registered students</span>
-                      </div>
-                      <Button
-                        onClick={() => handleSendReminder(event._id, event.eventName)}
-                        disabled={sending === event._id}
-                        className="bg-orange-500 hover:bg-orange-600 text-white"
-                      >
-                        {sending === event._id ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                            Sending...
-                          </>
-                        ) : (
-                          <>
-                            <Mail className="h-4 w-4 mr-2" />
-                            Send Reminder
-                          </>
-                        )}
-                      </Button>
-                    </div>
+                    <Button
+                      onClick={() => handleSendReminder(event._id)}
+                      disabled={!!sending}
+                      className="w-full sm:w-auto bg-orange-600 hover:bg-orange-500 text-white"
+                    >
+                      {sending === event._id ? (
+                        <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Sending...</>
+                      ) : (
+                        <><Mail className="h-4 w-4 mr-2" /> Send Reminder to All</>
+                      )}
+                    </Button>
                   </CardContent>
                 </Card>
               ))}
             </div>
           )}
-
-          <Alert className="mt-8">
-            <CheckCircle className="h-4 w-4" />
-            <AlertDescription>
-              <strong>Note:</strong> Reminder emails will be sent to all students who have registered for the selected event. 
-              The emails include event details, venue information, and a link to join the WhatsApp group.
-            </AlertDescription>
-          </Alert>
         </div>
       </main>
-
-      <footer className="border-t py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Event Management System. All rights reserved.
-        </div>
-      </footer>
     </div>
   );
 }
