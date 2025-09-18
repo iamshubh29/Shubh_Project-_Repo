@@ -27,13 +27,13 @@ export function verifyToken(token: string) {
   }
 }
 
-export function getTokenFromCookies() {
-  const cookieStore = cookies();
+export async function getTokenFromCookies() {
+  const cookieStore = await cookies();
   return cookieStore.get('auth-token')?.value;
 }
 
-export function getUserFromToken() {
-  const token = getTokenFromCookies();
+export async function getUserFromToken() {
+  const token = await getTokenFromCookies();
   if (!token) return null;
   
   try {
@@ -50,7 +50,7 @@ export async function authenticateAdmin(username: string, password: string) {
   return null;
 }
 
-export function isAdmin() {
-  const user = getUserFromToken();
+export async function isAdmin() {
+  const user = await getUserFromToken();
   return user && typeof user !== 'string' && user.role === 'admin';
 }

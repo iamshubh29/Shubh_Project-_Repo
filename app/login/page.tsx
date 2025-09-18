@@ -13,7 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { GraduationCap, ArrowLeft, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { adminLogin } from '@/app/actions/user';
-import { getTokenFromCookies } from '@/lib/auth';
+
 import { useEffect } from 'react';
 
 const formSchema = z.object({

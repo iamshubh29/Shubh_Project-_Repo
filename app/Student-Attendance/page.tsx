@@ -35,7 +35,7 @@ export default function page() {
         return;
       }
 
-      const attendanceResult = await markStudentAttendence(userId);
+      const attendanceResult = await markAttendance(userId);
       setScanResult({
         success: attendanceResult.success,
         message: attendanceResult.message || attendanceResult.error || "Unknown error",

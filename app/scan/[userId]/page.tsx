@@ -14,7 +14,16 @@ import { GraduationCap, ArrowLeft, CheckCircle, XCircle } from "lucide-react";
 import { markAttendance } from "@/app/actions/user";
 import { useToast } from "@/hooks/use-toast";
 
-export default function ScanPage({ params }: { params: { userId: string } }) {
+type PageProps = {
+  params: Promise<{
+    userId: string;
+  }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+
+export default function ScanPage({ params }: PageProps) {
+  const [userId, setUserId] = useState<string>("");
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
@@ -28,10 +37,21 @@ export default function ScanPage({ params }: { params: { userId: string } }) {
     };
   } | null>(null);
 
+  // Resolve params Promise
   useEffect(() => {
+    async function resolveParams() {
+      const resolvedParams = await params;
+      setUserId(resolvedParams.userId);
+    }
+    resolveParams();
+  }, [params]);
+
+  useEffect(() => {
+    if (!userId) return; // Wait for userId to be resolved
+
     async function processAttendance() {
       try {
-        const result = await markAttendance(params.userId);
+        const result = await markAttendance(userId);
         if (result.error) {
           if (result.error === "Unauthorized access") {
             toast({
@@ -62,7 +82,7 @@ export default function ScanPage({ params }: { params: { userId: string } }) {
     }
 
     processAttendance();
-  }, [params.userId]);
+  }, [userId, router, toast]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
